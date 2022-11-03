@@ -2,121 +2,121 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Card, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useBankContext } from "../utils/BankContext";
+import { auth } from "../utils/firebase.js";
+import { onAuthStateChanged } from "firebase/auth";
+
 
 const Deposit = () => {
-  const { bank, currentUser, updateTransactions } = useBankContext();
-
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [depositAmount, setDepositAmount] = useState("");
+  const [amount, setAmount] = useState("");
+  const [email, setEmail] = useState("");
+  const [activeUser, setActiveUser] = useState({});
 
-  const user = bank.users.find((user) => user.name === currentUser.name);
+  onAuthStateChanged(auth, (user) => {
+    setActiveUser(user);
+
+  });
 
   const handleChange = (e) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+
+    
     setSuccessMessage("");
     setErrorMessage("");
-    setDepositAmount(e.target.value);
+    setAmount(value);
   };
+
+  function updateUser() {
+    fetch(`/account/update/${activeUser.email}/${amount}`)
+      .then((response) => response.text())
+      .then((text) => {
+        try {
+          const data = JSON.parse(text);
+          setSuccessMessage(`$${amount} has been added to ${activeUser.email}'s account.`);
+
+          console.log("JSON:", data);
+        } catch (err) {
+          setErrorMessage("Deposit failed");
+          console.log("err:", text);
+        }
+      });
+  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    updateUser(email, amount);
 
-    setErrorMessage("");
-    let currentBalance = parseFloat(user.balance);
-    let addedFunds = parseFloat(depositAmount);
-    let newBalance = currentBalance + addedFunds;
-
-    let currentDate = Date();
-
-    let subtractedFunds = null;
-    
-    const userName = bank.loggedInUser;
-    let transType = "credit";
-
-    if (Number(addedFunds) && addedFunds < 0) {
-      setErrorMessage(`You can not deposit a negative amount!`);
-    } else if (!Number(addedFunds) && addedFunds !== 0) {
-      setErrorMessage(`You must input a number!`);
-    } else if (Number(addedFunds) && addedFunds > 0) {
-      user.balance = newBalance;
-      setSuccessMessage(`$${addedFunds} has been added to your balance.`);
-      updateTransactions(
-        userName,
-        currentBalance,
-        newBalance,
-        subtractedFunds,
-        addedFunds,
-        currentDate,
-        transType
-      );
-      setDepositAmount("");
-    }
+    setAmount("");
   };
 
-  return (
-    <>
-      <Card
-        bg="light"
-        text="dark"
-        border="primary"
-        style={{ width: "18rem", position: "relative", left: "100px" }}
-      >
-        <Card.Header>Deposit</Card.Header>
-        <Card.Body>
-          {bank.loggedInUser ? (
-            <>
-              <Card.Text>User : {bank.loggedInUser}</Card.Text>
-              <Card.Text>Balance : $ {user.balance}</Card.Text>
-              <form id="depo" onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label
-                    htmlFor="exampleInputDepositAmount"
-                    className="form-label"
-                  >
-                    Amount : $ {depositAmount}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="depositAmount"
-                    value={depositAmount}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <button
-                  disabled={!depositAmount ? true : false}
-                  type="submit"
-                  className="btn btn-primary"
+  if (activeUser?.email)
+    return (
+      <>
+        <Card
+          bg="light"
+          text="dark"
+          border="primary"
+          style={{ width: "18rem", position: "relative", left: "100px" }}
+        >
+          <Card.Header>Deposit</Card.Header>
+          <Card.Body>
+            <Card.Text>Balance : </Card.Text>
+            <form id="depo" onSubmit={handleSubmit}>
+              <div>
+                <label>User : {activeUser.email}</label>{" "}
+              </div>
+              <div className="mb-3">
+                <label
+                  htmlFor="exampleInputDepositAmount"
+                  className="form-label"
                 >
-                  Deposit
-                </button>
-                {errorMessage && (
-                  <div className="mt-2 alert alert-danger" role="alert">
-                    {errorMessage}
-                  </div>
-                )}
-                {successMessage && (
-                  <div className="mt-2 alert alert-success" role="alert">
-                    {successMessage}
-                    <br />
-                  </div>
-                )}
-              </form>
-            </>
-          ) : (
-            <div>
-              <Card.Title>Please Login</Card.Title>
-              <Link to="/login">
-                <Button>Login</Button>
-              </Link>
-            </div>
-          )}
+                  Amount : $ {amount}
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="depositAmount"
+                  value={amount}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <button
+                disabled={!amount ? true : false}
+                type="submit"
+                className="btn btn-primary"
+              >
+                Deposit
+              </button>
+              {errorMessage && (
+                <div className="mt-2 alert alert-danger" role="alert">
+                  {errorMessage}
+                </div>
+              )}
+              {successMessage && (
+                <div className="mt-2 alert alert-success" role="alert">
+                  {successMessage}
+                  <br />
+                </div>
+              )}
+            </form>
+          </Card.Body>
+        </Card>
+      </>
+    );
+  else
+    return (
+      <Card>
+        <Card.Body>
+          <Card.Title>Please Login</Card.Title>
+          <Link to="/login">
+            <Button>Login</Button>
+          </Link>
         </Card.Body>
       </Card>
-    </>
-  );
+    );
 };
 
 export default Deposit;

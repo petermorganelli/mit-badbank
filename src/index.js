@@ -8,7 +8,7 @@ import Home from "./routes/home";
 import Register from "./routes/register";
 import Deposit from "./routes/deposit";
 import Withdrawl from "./routes/withdrawl";
-import Data from "./routes/alldata";
+import Data from "./routes/mydata";
 import Login from "./routes/login";
 import NotFound from "./routes/notFound";
 
@@ -24,7 +24,7 @@ root.render(
           <Route path="/register" element={<Register/>} />
           <Route path="/deposit" element={<Deposit/>} />
           <Route path="/withdrawl" element={<Withdrawl/>} />
-          <Route path="/alldata" element={<Data/>} />
+          <Route path="/mydata" element={<Data/>} />
           <Route path="/login" element={<Login/>} />
           <Route path="*" element={<NotFound/>} />
         </Route>
