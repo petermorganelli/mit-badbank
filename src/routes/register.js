@@ -40,9 +40,9 @@ const Register = () => {
   //adds user into mongoDb database
 
   function addUser() {
-    console.log(name, email, password);
+    console.log(name, email, password, balance);
 
-    const url = `/account/create/${name}/${email}/${password}`;
+    const url = `/account/create/${name}/${email}/${password}/${balance}`;
     (async () => {
       var res = await fetch(url);
       var data = await res.json();
