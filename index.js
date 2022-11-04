@@ -13,7 +13,7 @@ app.use(express.static("build"));
 app.use(cors());
 
 // create user account
-app.get("/account/create/:name/:email/:password", function (req, res) {
+app.get("/account/create/:name/:email/:password/:balance", function (req, res) {
   // check if account exists
   dal.find(req.params.email).then((users) => {
     // if user exists, return error message
@@ -22,8 +22,9 @@ app.get("/account/create/:name/:email/:password", function (req, res) {
       res.send("User already in exists");
     } else {
       // else create user
+      var balance = Number(req.params.balance);
       dal
-        .create(req.params.name, req.params.email, req.params.password)
+        .create(req.params.name, req.params.email, req.params.password, balance)
         .then((user) => {
           console.log(user);
           res.send(user);

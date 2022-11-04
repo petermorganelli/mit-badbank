@@ -71,7 +71,7 @@ const Register = () => {
     } else if (name === "fieldEmail") {
       setEmail(value);
     } else {
-      setBalance(value);
+      setBalance(Number(value));
     }
   };
   ///handles form submit
@@ -96,7 +96,7 @@ const Register = () => {
       setErrorMessage(`Password must be at least 8 characters long.`);
       return;
     } else {
-      addUser(name, password, email);
+      addUser(name, password, email, balance);
       createFirebaseUser(email, password);
 
       setSuccessMessage("You have successfully created an account!");
