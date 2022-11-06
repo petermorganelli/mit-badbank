@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Card, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { auth } from "../utils/firebase.js";
 import { onAuthStateChanged } from "firebase/auth";
-
 
 const Deposit = () => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -15,14 +14,11 @@ const Deposit = () => {
 
   onAuthStateChanged(auth, (user) => {
     setActiveUser(user);
-
   });
 
   const handleChange = (e) => {
     e.preventDefault();
     const { name, value } = e.target;
-
-    
     setSuccessMessage("");
     setErrorMessage("");
     setAmount(value);
@@ -34,7 +30,9 @@ const Deposit = () => {
       .then((text) => {
         try {
           const data = JSON.parse(text);
-          setSuccessMessage(`$${amount} has been added to ${activeUser.email}'s account.`);
+          setSuccessMessage(
+            `$${amount} has been added to ${activeUser.email}'s account.`
+          );
 
           console.log("JSON:", data);
         } catch (err) {
@@ -67,6 +65,7 @@ const Deposit = () => {
               <div>
                 <label>User : {activeUser.email}</label>{" "}
               </div>
+              <br/>
               <div className="mb-3">
                 <label
                   htmlFor="exampleInputDepositAmount"
